@@ -13,34 +13,27 @@ export interface SongStatistics {
 export class SongService {
   static async getStatistics(): Promise<SongStatistics> {
     try {
-      // Total songs
       const totalSongs = await Song.countDocuments();
 
-      // Total unique artists
       const artists = await Song.distinct("artist");
       const totalArtists = artists.length;
 
-      // Total unique albums
       const albums = await Song.distinct("album");
       const totalAlbums = albums.length;
 
-      // Total unique genres
       const genres = await Song.distinct("genre");
       const totalGenres = genres.length;
 
-      // Songs count by genre
       const songsByGenre = await Song.aggregate([
         { $group: { _id: "$genre", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ]);
 
-      // Songs count by artist
       const songsByArtist = await Song.aggregate([
         { $group: { _id: "$artist", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ]);
 
-      // Songs count by album (with artist info)
       const songsByAlbum = await Song.aggregate([
         {
           $group: {

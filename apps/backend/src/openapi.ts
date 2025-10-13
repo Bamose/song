@@ -71,6 +71,76 @@ export const openApiSpec = {
           },
         },
       },
+      PaginatedSongs: {
+        type: "object",
+        description:
+          "Collection of songs along with pagination metadata for client-side navigation.",
+        required: ["data", "pagination"],
+        properties: {
+          data: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/Song",
+            },
+          },
+          pagination: {
+            $ref: "#/components/schemas/PaginationMeta",
+          },
+        },
+      },
+      PaginationMeta: {
+        type: "object",
+        description: "Pagination metadata returned alongside song collections.",
+        required: [
+          "total",
+          "page",
+          "limit",
+          "totalPages",
+          "hasNextPage",
+          "hasPrevPage",
+        ],
+        properties: {
+          total: {
+            type: "integer",
+            minimum: 0,
+            example: 42,
+          },
+          page: {
+            type: "integer",
+            minimum: 1,
+            example: 1,
+          },
+          limit: {
+            type: "integer",
+            minimum: 1,
+            maximum: 50,
+            example: 10,
+          },
+          totalPages: {
+            type: "integer",
+            minimum: 1,
+            example: 5,
+          },
+          hasNextPage: {
+            type: "boolean",
+            example: true,
+          },
+          hasPrevPage: {
+            type: "boolean",
+            example: false,
+          },
+          sortBy: {
+            type: "string",
+            enum: ["title", "artist", "album", "genre", "createdAt", "updatedAt"],
+            example: "createdAt",
+          },
+          sortOrder: {
+            type: "string",
+            enum: ["asc", "desc"],
+            example: "desc",
+          },
+        },
+      },
       Statistics: {
         type: "object",
         properties: {
@@ -183,6 +253,55 @@ export const openApiSpec = {
         },
         description: "Filter songs by album.",
       },
+      SearchQuery: {
+        name: "search",
+        in: "query",
+        schema: {
+          type: "string",
+        },
+        description:
+          "Case-insensitive search term applied to title, artist, album, or genre.",
+      },
+      SortByQuery: {
+        name: "sortBy",
+        in: "query",
+        schema: {
+          type: "string",
+          enum: ["title", "artist", "album", "genre", "createdAt", "updatedAt"],
+        },
+        description: "Field used to sort the returned songs.",
+      },
+      SortOrderQuery: {
+        name: "sortOrder",
+        in: "query",
+        schema: {
+          type: "string",
+          enum: ["asc", "desc"],
+          default: "desc",
+        },
+        description: "Whether to sort ascending or descending.",
+      },
+      PageQuery: {
+        name: "page",
+        in: "query",
+        schema: {
+          type: "integer",
+          minimum: 1,
+          default: 1,
+        },
+        description: "Page of results to return (1-based).",
+      },
+      LimitQuery: {
+        name: "limit",
+        in: "query",
+        schema: {
+          type: "integer",
+          minimum: 1,
+          maximum: 50,
+          default: 10,
+        },
+        description: "Number of results per page (max 50).",
+      },
     },
   },
   paths: {
@@ -217,7 +336,8 @@ export const openApiSpec = {
     "/api/songs": {
       get: {
         summary: "List songs",
-        description: "Fetch a list of songs. Supports optional filtering.",
+        description:
+          "Fetch a paginated list of songs with optional filtering, searching, and sorting.",
         parameters: [
           {
             $ref: "#/components/parameters/ArtistQuery",
@@ -228,6 +348,21 @@ export const openApiSpec = {
           {
             $ref: "#/components/parameters/AlbumQuery",
           },
+          {
+            $ref: "#/components/parameters/SearchQuery",
+          },
+          {
+            $ref: "#/components/parameters/SortByQuery",
+          },
+          {
+            $ref: "#/components/parameters/SortOrderQuery",
+          },
+          {
+            $ref: "#/components/parameters/PageQuery",
+          },
+          {
+            $ref: "#/components/parameters/LimitQuery",
+          },
         ],
         responses: {
           "200": {
@@ -235,10 +370,7 @@ export const openApiSpec = {
             content: {
               "application/json": {
                 schema: {
-                  type: "array",
-                  items: {
-                    $ref: "#/components/schemas/Song",
-                  },
+                  $ref: "#/components/schemas/PaginatedSongs",
                 },
               },
             },

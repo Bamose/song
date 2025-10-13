@@ -3,7 +3,6 @@ import { Song } from "../models/song";
 import { SongService } from "../services/songService";
 
 export class SongController {
-  // Create a new song
   static async createSong(req: Request, res: Response): Promise<void> {
     try {
       const { title, artist, album, genre } = req.body;
@@ -22,7 +21,6 @@ export class SongController {
     }
   }
 
-  // Get all songs with optional filters
   static async getAllSongs(req: Request, res: Response): Promise<void> {
     try {
       const {
@@ -113,7 +111,6 @@ export class SongController {
     }
   }
 
-  // Get a single song by ID
   static async getSongById(req: Request, res: Response): Promise<void> {
     try {
       const song = await Song.findById(req.params.id);
@@ -129,7 +126,6 @@ export class SongController {
     }
   }
 
-  // Update a song
   static async updateSong(req: Request, res: Response): Promise<void> {
     try {
       const { title, artist, album, genre } = req.body;
@@ -151,7 +147,6 @@ export class SongController {
     }
   }
 
-  // Delete a song
   static async deleteSong(req: Request, res: Response): Promise<void> {
     try {
       const song = await Song.findByIdAndDelete(req.params.id);
@@ -167,7 +162,6 @@ export class SongController {
     }
   }
 
-  // Get statistics
   static async getStatistics(req: Request, res: Response): Promise<void> {
     try {
       const stats = await SongService.getStatistics();

@@ -3,7 +3,6 @@ import { SongController } from "../controllers/songController";
 
 const router = Router();
 
-// CRUD routes
 router.post("/", SongController.createSong);
 router.get("/", SongController.getAllSongs);
 router.get("/stats", SongController.getStatistics);
