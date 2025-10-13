@@ -4,6 +4,7 @@ import express from "express";
 import { connectDB } from "./config/db";
 import songRoutes from "./routes/song";
 import { openApiSpec } from "./openapi";
+import { logger } from "@song-app/utils";
 
 dotenv.config();
 
@@ -78,10 +79,10 @@ app.get("/docs", (_req, res) => {
 connectDB()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Backend server running on http://localhost:${PORT}`);
+      logger.log(`Backend server running on http://localhost:${PORT}`);
     });
   })
   .catch((error) => {
-    console.error("Failed to connect to database:", error);
+    logger.error("Failed to connect to database:", error);
     process.exit(1);
   });

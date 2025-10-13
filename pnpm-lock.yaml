@@ -17,6 +17,12 @@ importers:
       '@song-app/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@song-app/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      consola:
+        specifier: ^3.2.3
+        version: 3.4.2
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -118,6 +124,22 @@ importers:
 
   packages/types:
     devDependencies:
+      typescript:
+        specifier: ^5.2.2
+        version: 5.9.3
+
+  packages/utils:
+    dependencies:
+      consola:
+        specifier: ^3.2.3
+        version: 3.4.2
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.6.1
+    devDependencies:
+      '@types/node':
+        specifier: ^20.5.9
+        version: 20.19.21
       typescript:
         specifier: ^5.2.2
         version: 5.9.3
@@ -2140,6 +2162,10 @@ packages:
   connect-history-api-fallback@2.0.0:
     resolution: {integrity: sha512-U73+6lQFmfiNPrYbXqr6kZ1i1wiRqXnp2nhMsINseWXO8lDau0LGEffJ8kQi4EjLZympVgRdvqjAgiZ1tgzDDA==}
     engines: {node: '>=0.8'}
+
+  consola@3.4.2:
+    resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
+    engines: {node: ^14.18.0 || >=16.10.0}
 
   content-disposition@0.5.4:
     resolution: {integrity: sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ==}
@@ -8480,6 +8506,8 @@ snapshots:
   confusing-browser-globals@1.0.11: {}
 
   connect-history-api-fallback@2.0.0: {}
+
+  consola@3.4.2: {}
 
   content-disposition@0.5.4:
     dependencies:
