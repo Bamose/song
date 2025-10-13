@@ -1,8 +1,5 @@
 import type { Song, SongSortField, SortOrder } from "@song-app/types";
 
-/**
- * Helper function to calculate pagination info
- */
 export const calculatePaginationInfo = (
   currentPage: number,
   totalPages: number,
@@ -23,9 +20,6 @@ export const calculatePaginationInfo = (
   };
 };
 
-/**
- * Helper function to validate sort field
- */
 export const validateSortField = (sortBy: string): SongSortField => {
   const validSortFields: SongSortField[] = [
     "title",
@@ -41,9 +35,6 @@ export const validateSortField = (sortBy: string): SongSortField => {
     : "createdAt";
 };
 
-/**
- * Helper function to validate sort order
- */
 export const validateSortOrder = (sortOrder: string): SortOrder => {
   const validSortOrders: SortOrder[] = ["asc", "desc"];
 
@@ -52,9 +43,6 @@ export const validateSortOrder = (sortOrder: string): SortOrder => {
     : "desc";
 };
 
-/**
- * Helper function to format song display data
- */
 export const formatSongForDisplay = (song: Song) => ({
   id: song._id,
   title: song.title,
@@ -63,9 +51,6 @@ export const formatSongForDisplay = (song: Song) => ({
   genre: song.genre,
 });
 
-/**
- * Helper function to check if filters have changed
- */
 export const hasFiltersChanged = (
   currentFilters: Record<string, any>,
   newFilters: Record<string, any>
@@ -75,9 +60,6 @@ export const hasFiltersChanged = (
   );
 };
 
-/**
- * Helper function to create filter change handler
- */
 export const createFilterChangeHandler =
   (
     updateFilters: (updates: Record<string, string | number | null>) => void,
@@ -88,9 +70,6 @@ export const createFilterChangeHandler =
     updateFilters({ [key]: value || null, page: 1 });
   };
 
-/**
- * Helper function to create sort change handler
- */
 export const createSortChangeHandler = (
   updateSort: (sortBy: string, sortOrder?: string) => void,
   currentSortBy: string,
@@ -106,9 +85,6 @@ export const createSortChangeHandler = (
   },
 });
 
-/**
- * Helper function to create pagination handlers
- */
 export const createPaginationHandlers = (
   updatePage: (page: number) => void,
   updatePageSize: (limit: number) => void,
@@ -127,9 +103,6 @@ export const createPaginationHandlers = (
   },
 });
 
-/**
- * Helper function to create action handlers
- */
 export const createActionHandlers = (
   dispatch: any,
   onAddClick: () => void
