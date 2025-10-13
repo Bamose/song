@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
+import { NuqsAdapter } from "nuqs/adapters/react";
 import "./index.css";
 import App from "./App";
 import { store } from "./store";
@@ -12,7 +13,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <NuqsAdapter>
+        <App />
+      </NuqsAdapter>
     </Provider>
   </React.StrictMode>
 );

@@ -1,50 +1,66 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
+import { useDebounce } from "use-debounce";
+
+// Types
+import type { Song, SongSortField, SortOrder } from "@song-app/types";
+
+// Hooks
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import { useAppSelector } from "../hooks/useAppSelector";
+import { useSongFilters } from "../hooks/useSongFilters";
+
+// Redux actions
 import {
-  fetchSongsRequest,
   deleteSongRequest,
+  fetchSongsRequest,
   selectSong,
 } from "../store/slices/songSlice";
-import type { Song, SongSortField, SortOrder } from "@song-app/types";
+
+// Utils
 import {
-  Container,
-  Header,
-  Title,
-  SearchContainer,
-  SearchWrapper,
-  SearchIconWrapper,
-  SearchInput,
-  FiltersContainer,
-  FilterGroup,
-  FilterControl,
-  FilterLabel,
-  FilterInput,
-  FilterSelect,
-  ControlsRow,
-  ResetButton,
-  TableContainer,
-  TableWrapper,
-  Table,
-  TableHead,
-  TableRow,
-  TableHeader,
-  TableCell,
-  TitleCell,
-  ArtistCell,
-  AlbumCell,
-  GenreCell,
-  GenreBadge,
+  calculatePaginationInfo,
+  createActionHandlers,
+  createFilterChangeHandler,
+  createPaginationHandlers,
+  createSortChangeHandler,
+} from "../utils";
+import {
   ActionsCell,
+  AlbumCell,
+  ArtistCell,
   ButtonGroup,
-  IconButton,
+  Container,
+  ControlsRow,
   EmptyState,
+  FilterControl,
+  FilterGroup,
+  FilterInput,
+  FilterLabel,
+  FiltersContainer,
+  FilterSelect,
+  GenreBadge,
+  GenreCell,
+  Header,
+  IconButton,
   LoadingState,
-  PaginationBar,
-  PaginationControls,
-  PaginationButton,
   PageInfo,
   PageSizeSelect,
+  PaginationBar,
+  PaginationButton,
+  PaginationControls,
+  ResetButton,
+  SearchContainer,
+  SearchIconWrapper,
+  SearchInput,
+  SearchWrapper,
+  Table,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableWrapper,
+  Title,
+  TitleCell,
 } from "../styles/SongList.styles";
 
 interface SongListProps {
@@ -53,148 +69,125 @@ interface SongListProps {
 
 const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
   const dispatch = useAppDispatch();
-  const { songs, isFetching, filters, pagination } = useAppSelector(
+  const { songs, isFetching, pagination } = useAppSelector(
     (state) => state.songs
   );
-  const [searchValue, setSearchValue] = useState(filters.search ?? "");
-  const skipInitialSearch = useRef(true);
-  const suppressNextSearch = useRef(false);
 
+  // Use nuqs hook for URL-based filter management
+  const {
+    filters,
+    rawFilters,
+    updateFilters,
+    updateSearchImmediate,
+    updatePage,
+    updatePageSize,
+    updateSort,
+    resetFilters,
+    isInitialMount,
+  } = useSongFilters();
+
+  // Debounce the search value for API calls
+  const [debouncedSearchValue] = useDebounce(rawFilters.search, 400);
+
+  // Initial fetch on mount with URL params
   useEffect(() => {
-    dispatch(fetchSongsRequest());
-  }, [dispatch]);
+    dispatch(fetchSongsRequest(filters));
+  }, []);
 
+  // Fetch songs whenever filters change (URL changes)
   useEffect(() => {
-    const nextValue = filters.search ?? "";
-    if (nextValue === searchValue) {
+    // Skip initial mount as we already fetched in the first useEffect
+    if (isInitialMount) {
       return;
     }
-    suppressNextSearch.current = true;
-    setSearchValue(nextValue);
-  }, [filters.search, searchValue]);
+    dispatch(fetchSongsRequest(filters));
+  }, [
+    filters.artist,
+    filters.album,
+    filters.genre,
+    filters.sortBy,
+    filters.sortOrder,
+    filters.page,
+    filters.limit,
+    dispatch,
+  ]);
 
+  // Separate effect for debounced search
   useEffect(() => {
-    if (skipInitialSearch.current) {
-      skipInitialSearch.current = false;
+    // Skip initial mount as we already fetched in the first useEffect
+    if (isInitialMount) {
       return;
     }
+    // Only trigger API call when debounced search value changes
+    dispatch(fetchSongsRequest({ ...filters, search: debouncedSearchValue }));
+  }, [debouncedSearchValue, dispatch]);
 
-    if (suppressNextSearch.current) {
-      suppressNextSearch.current = false;
+  // Reset page to 1 when search changes (but not on initial mount)
+  useEffect(() => {
+    if (isInitialMount) {
       return;
     }
-
-    const handler = window.setTimeout(() => {
-      const trimmedSearch = searchValue.trim();
-      dispatch(
-        fetchSongsRequest({
-          search: trimmedSearch.length > 0 ? trimmedSearch : undefined,
-          page: 1,
-        })
-      );
-    }, 400);
-
-    return () => {
-      window.clearTimeout(handler);
-    };
-  }, [searchValue, dispatch]);
-
-  const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this song?")) {
-      dispatch(deleteSongRequest(id));
+    if (debouncedSearchValue !== rawFilters.search) {
+      updatePage(1);
     }
+  }, [debouncedSearchValue, rawFilters.search, isInitialMount, updatePage]);
+
+  // Create action handlers using helper
+  const { handleDelete, handleEdit } = createActionHandlers(
+    dispatch,
+    onAddClick
+  );
+
+  // Handle search input changes
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    updateSearchImmediate(value);
   };
 
-  const handleEdit = (song: Song) => {
-    dispatch(selectSong(song));
-    onAddClick();
-  };
+  // Create filter change handlers using helper
+  const handleFilterChange = createFilterChangeHandler(updateFilters, "artist");
+  const handleAlbumFilterChange = createFilterChangeHandler(
+    updateFilters,
+    "album"
+  );
+  const handleGenreFilterChange = createFilterChangeHandler(
+    updateFilters,
+    "genre"
+  );
 
-  const handleFilterChange =
-    (key: "artist" | "album" | "genre") =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value.trim();
-      dispatch(
-        fetchSongsRequest({
-          [key]: value.length > 0 ? value : undefined,
-          page: 1,
-        })
-      );
-    };
+  // Create sort change handlers using helper
+  const { sortBy: handleSortByChange, sortOrder: handleSortOrderChange } =
+    createSortChangeHandler(updateSort, filters.sortBy, filters.sortOrder);
 
-  const handleSortByChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value as SongSortField;
-    dispatch(
-      fetchSongsRequest({
-        sortBy: value,
-        page: 1,
-      })
+  // Create pagination handlers using helper
+  const { pageChange: handlePageChange, pageSizeChange: handlePageSizeChange } =
+    createPaginationHandlers(
+      updatePage,
+      updatePageSize,
+      pagination?.page ?? 1,
+      pagination?.totalPages ?? 1
     );
-  };
-
-  const handleSortOrderChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const value = event.target.value as SortOrder;
-    dispatch(
-      fetchSongsRequest({
-        sortOrder: value,
-        page: 1,
-      })
-    );
-  };
-
-  const handlePageSizeChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const value = Number(event.target.value);
-    dispatch(
-      fetchSongsRequest({
-        limit: value,
-        page: 1,
-      })
-    );
-  };
-
-  const handlePageChange = (nextPage: number) => {
-    if (nextPage < 1 || nextPage === (pagination?.page ?? 1)) {
-      return;
-    }
-
-    dispatch(
-      fetchSongsRequest({
-        page: nextPage,
-      })
-    );
-  };
 
   const handleResetFilters = () => {
-    suppressNextSearch.current = true;
-    setSearchValue("");
-    dispatch(
-      fetchSongsRequest({
-        search: undefined,
-        artist: undefined,
-        album: undefined,
-        genre: undefined,
-        sortBy: "createdAt",
-        sortOrder: "desc",
-        page: 1,
-        limit: filters.limit ?? 10,
-      })
-    );
+    resetFilters();
   };
 
-  const sortByValue: SongSortField = filters.sortBy ?? "createdAt";
-  const sortOrderValue: SortOrder = filters.sortOrder ?? "desc";
+  // Calculate pagination info using helper
   const currentPage = pagination?.page ?? 1;
   const totalPages = pagination?.totalPages ?? 1;
-  const pageSize = filters.limit ?? 10;
+  const pageSize = filters.limit;
   const totalItems = pagination?.total ?? songs.length;
-  const hasPrevPage = pagination?.hasPrevPage ?? currentPage > 1;
-  const hasNextPage = pagination?.hasNextPage ?? currentPage < totalPages;
-  const from = songs.length ? (currentPage - 1) * pageSize + 1 : 0;
-  const to = songs.length ? (currentPage - 1) * pageSize + songs.length : 0;
+
+  const { hasPrevPage, hasNextPage, from, to } = calculatePaginationInfo(
+    currentPage,
+    totalPages,
+    pageSize,
+    songs.length,
+    totalItems
+  );
+
+  const sortByValue: SongSortField = filters.sortBy;
+  const sortOrderValue: SortOrder = filters.sortOrder;
 
   return (
     <Container>
@@ -210,8 +203,8 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
           <SearchInput
             type="text"
             placeholder="Search for a song"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            value={rawFilters.search}
+            onChange={handleSearchChange}
           />
         </SearchWrapper>
       </SearchContainer>
@@ -224,8 +217,8 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
               id="artist-filter"
               type="text"
               placeholder="Filter by artist"
-              value={filters.artist ?? ""}
-              onChange={handleFilterChange("artist")}
+              value={rawFilters.artist}
+              onChange={handleFilterChange}
             />
           </FilterControl>
           <FilterControl>
@@ -234,8 +227,8 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
               id="album-filter"
               type="text"
               placeholder="Filter by album"
-              value={filters.album ?? ""}
-              onChange={handleFilterChange("album")}
+              value={rawFilters.album}
+              onChange={handleAlbumFilterChange}
             />
           </FilterControl>
           <FilterControl>
@@ -244,8 +237,8 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
               id="genre-filter"
               type="text"
               placeholder="Filter by genre"
-              value={filters.genre ?? ""}
-              onChange={handleFilterChange("genre")}
+              value={rawFilters.genre}
+              onChange={handleGenreFilterChange}
             />
           </FilterControl>
         </FilterGroup>
