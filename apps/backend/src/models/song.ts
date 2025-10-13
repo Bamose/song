@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
-import { Song as ISong } from "@song-app/types";
+import type { Song as ISong } from "@song-app/types";
 
 export interface SongDocument
   extends Omit<ISong, "_id" | "createdAt" | "updatedAt">,
@@ -35,7 +35,6 @@ const SongSchema = new Schema<SongDocument>(
   { timestamps: true }
 );
 
-// Indexes for better query performance
 SongSchema.index({ artist: 1 });
 SongSchema.index({ genre: 1 });
 SongSchema.index({ album: 1 });

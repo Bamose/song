@@ -25,15 +25,89 @@ export class SongController {
   // Get all songs with optional filters
   static async getAllSongs(req: Request, res: Response): Promise<void> {
     try {
-      const { artist, genre, album } = req.query;
-      const filter: any = {};
+      const {
+        artist,
+        genre,
+        album,
+        search,
+        sortBy = "createdAt",
+        sortOrder = "desc",
+        page = "1",
+        limit = "10",
+      } = req.query;
+
+      const filter: Record<string, unknown> = {};
 
       if (artist) filter.artist = artist;
       if (genre) filter.genre = genre;
       if (album) filter.album = album;
 
-      const songs = await Song.find(filter).sort({ createdAt: -1 });
-      res.json(songs);
+      if (search && typeof search === "string") {
+        const searchTerm = search.trim();
+        if (searchTerm.length > 0) {
+          const escapeRegExp = (value: string) =>
+            value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const regex = new RegExp(escapeRegExp(searchTerm), "i");
+          filter.$or = [
+            { title: regex },
+            { artist: regex },
+            { album: regex },
+            { genre: regex },
+          ];
+        }
+      }
+
+      const parsePositiveInt = (value: unknown, fallback: number): number => {
+        const parsed = parseInt(String(value), 10);
+        if (Number.isNaN(parsed) || parsed < 1) {
+          return fallback;
+        }
+        return parsed;
+      };
+
+      const parsedLimit = Math.min(parsePositiveInt(limit, 10), 50);
+      const parsedPage = parsePositiveInt(page, 1);
+
+      const allowedSortFields = [
+        "title",
+        "artist",
+        "album",
+        "genre",
+        "createdAt",
+        "updatedAt",
+      ];
+      const sortField = allowedSortFields.includes(String(sortBy))
+        ? String(sortBy)
+        : "createdAt";
+      const sortDirection: 1 | -1 =
+        String(sortOrder).toLowerCase() === "asc" ? 1 : -1;
+      const sortOptions: Record<string, 1 | -1> = {
+        [sortField]: sortDirection,
+      };
+
+      const [songs, total] = await Promise.all([
+        Song.find(filter)
+          .sort(sortOptions)
+          .skip((parsedPage - 1) * parsedLimit)
+          .limit(parsedLimit),
+        Song.countDocuments(filter),
+      ]);
+
+      const totalPages = Math.max(Math.ceil(total / parsedLimit), 1);
+
+      res.json({
+        data: songs,
+        pagination: {
+          total,
+          page: parsedPage,
+          limit: parsedLimit,
+          totalPages,
+          hasNextPage: parsedPage < totalPages,
+          hasPrevPage: parsedPage > 1,
+          sortBy: sortField,
+          sortOrder: sortDirection === 1 ? "asc" : "desc",
+        },
+      });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

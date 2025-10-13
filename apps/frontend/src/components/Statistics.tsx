@@ -1,101 +1,35 @@
 import React, { useEffect } from "react";
-import styled from "@emotion/styled";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import { useAppSelector } from "../hooks/useAppSelector";
 import { fetchStatisticsRequest } from "../store/slices/songSlice";
-
-const Container = styled.div`
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-`;
-
-const Title = styled.h2`
-  margin-bottom: 1.5rem;
-  color: #667eea;
-  font-size: 1.5rem;
-`;
-
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-`;
-
-const StatCard = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px;
-  padding: 1rem;
-  color: white;
-
-  h3 {
-    font-size: 2rem;
-    margin-bottom: 0.25rem;
-  }
-
-  p {
-    font-size: 0.9rem;
-    opacity: 0.9;
-  }
-`;
-
-const Section = styled.div`
-  margin-top: 1.5rem;
-
-  h3 {
-    color: #667eea;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-  }
-`;
-
-const List = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-height: 200px;
-  overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #667eea;
-    border-radius: 3px;
-  }
-`;
-
-const ListItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem;
-  background: #f8f8f8;
-  border-radius: 6px;
-
-  span:first-of-type {
-    color: #333;
-    font-weight: 500;
-  }
-
-  span:last-of-type {
-    color: #667eea;
-    font-weight: 600;
-  }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  color: #999;
-  padding: 1rem;
-`;
+import {
+  Container,
+  Header,
+  Title,
+  Content,
+  StatsGrid,
+  StatCard,
+  StatValue,
+  StatLabel,
+  SectionsGrid,
+  Section,
+  SectionHeader,
+  SectionTitleGroup,
+  SectionIcon,
+  SectionTitle,
+  SectionCount,
+  List,
+  ListItem,
+  ItemContent,
+  ItemRank,
+  ItemName,
+  ItemStats,
+  ItemBadge,
+  ItemCount,
+  ItemLabel,
+  EmptyState,
+  LoadingState,
+} from "../styles/Statistics.styles";
 
 const Statistics: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -108,66 +42,158 @@ const Statistics: React.FC = () => {
   if (!statistics) {
     return (
       <Container>
-        <Title>📊 Statistics</Title>
-        <EmptyState>Loading statistics...</EmptyState>
+        <Header>
+          <Title>Statistics</Title>
+        </Header>
+        <LoadingState>Loading statistics...</LoadingState>
       </Container>
     );
   }
 
   return (
     <Container>
-      <Title>📊 Statistics</Title>
+      <Header>
+        <Title>Statistics</Title>
+      </Header>
 
-      <StatsGrid>
-        <StatCard>
-          <h3>{statistics.totalSongs}</h3>
-          <p>Total Songs</p>
-        </StatCard>
-        <StatCard>
-          <h3>{statistics.totalArtists}</h3>
-          <p>Artists</p>
-        </StatCard>
-        <StatCard>
-          <h3>{statistics.totalAlbums}</h3>
-          <p>Albums</p>
-        </StatCard>
-        <StatCard>
-          <h3>{statistics.totalGenres}</h3>
-          <p>Genres</p>
-        </StatCard>
-      </StatsGrid>
+      <Content>
+        <StatsGrid>
+          <StatCard>
+            <StatValue>{statistics.totalSongs}</StatValue>
+            <StatLabel>Total Songs</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatValue>{statistics.totalArtists}</StatValue>
+            <StatLabel>Artists</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatValue>{statistics.totalAlbums}</StatValue>
+            <StatLabel>Albums</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatValue>{statistics.totalGenres}</StatValue>
+            <StatLabel>Genres</StatLabel>
+          </StatCard>
+        </StatsGrid>
 
-      <Section>
-        <h3>🎼 Songs by Genre</h3>
-        <List>
-          {statistics.songsByGenre.length > 0 ? (
-            statistics.songsByGenre.map((item) => (
-              <ListItem key={item._id}>
-                <span>{item._id}</span>
-                <span>{item.count}</span>
-              </ListItem>
-            ))
-          ) : (
-            <EmptyState>No data</EmptyState>
-          )}
-        </List>
-      </Section>
+        <SectionsGrid>
+          <Section>
+            <SectionHeader>
+              <SectionTitleGroup>
+                <SectionIcon>
+                  <span className="material-symbols-outlined">music_note</span>
+                </SectionIcon>
+                <SectionTitle>Songs by Genre</SectionTitle>
+              </SectionTitleGroup>
+              <SectionCount>
+                {statistics.songsByGenre.length}{" "}
+                {statistics.songsByGenre.length === 1 ? "genre" : "genres"}
+              </SectionCount>
+            </SectionHeader>
+            {statistics.songsByGenre.length > 0 ? (
+              <List>
+                {statistics.songsByGenre.map((item, index) => (
+                  <ListItem key={item._id}>
+                    <ItemContent>
+                      <ItemRank>#{index + 1}</ItemRank>
+                      <ItemName>{item._id}</ItemName>
+                    </ItemContent>
+                    <ItemStats>
+                      <ItemBadge>
+                        <ItemCount>{item.count}</ItemCount>
+                        <ItemLabel>songs</ItemLabel>
+                      </ItemBadge>
+                    </ItemStats>
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <EmptyState>
+                <span className="material-symbols-outlined">music_off</span>
+                <p>No genre data available</p>
+              </EmptyState>
+            )}
+          </Section>
 
-      <Section>
-        <h3>👤 Songs by Artist</h3>
-        <List>
-          {statistics.songsByArtist.length > 0 ? (
-            statistics.songsByArtist.slice(0, 5).map((item) => (
-              <ListItem key={item._id}>
-                <span>{item._id}</span>
-                <span>{item.count}</span>
-              </ListItem>
-            ))
-          ) : (
-            <EmptyState>No data</EmptyState>
-          )}
-        </List>
-      </Section>
+          <Section>
+            <SectionHeader>
+              <SectionTitleGroup>
+                <SectionIcon>
+                  <span className="material-symbols-outlined">person</span>
+                </SectionIcon>
+                <SectionTitle>Top Artists</SectionTitle>
+              </SectionTitleGroup>
+              <SectionCount>
+                {statistics.songsByArtist.length}{" "}
+                {statistics.songsByArtist.length === 1 ? "artist" : "artists"}
+              </SectionCount>
+            </SectionHeader>
+            {statistics.songsByArtist.length > 0 ? (
+              <List>
+                {statistics.songsByArtist.slice(0, 10).map((item, index) => (
+                  <ListItem key={item._id}>
+                    <ItemContent>
+                      <ItemRank>#{index + 1}</ItemRank>
+                      <ItemName>{item._id}</ItemName>
+                    </ItemContent>
+                    <ItemStats>
+                      <ItemBadge>
+                        <ItemCount>{item.count}</ItemCount>
+                        <ItemLabel>songs</ItemLabel>
+                      </ItemBadge>
+                    </ItemStats>
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <EmptyState>
+                <span className="material-symbols-outlined">person_off</span>
+                <p>No artist data available</p>
+              </EmptyState>
+            )}
+          </Section>
+
+          <Section>
+            <SectionHeader>
+              <SectionTitleGroup>
+                <SectionIcon>
+                  <span className="material-symbols-outlined">album</span>
+                </SectionIcon>
+                <SectionTitle>Top Albums</SectionTitle>
+              </SectionTitleGroup>
+              <SectionCount>
+                {statistics.songsByAlbum?.length || 0}{" "}
+                {(statistics.songsByAlbum?.length || 0) === 1
+                  ? "album"
+                  : "albums"}
+              </SectionCount>
+            </SectionHeader>
+            {statistics.songsByAlbum && statistics.songsByAlbum.length > 0 ? (
+              <List>
+                {statistics.songsByAlbum.slice(0, 10).map((item, index) => (
+                  <ListItem key={item._id}>
+                    <ItemContent>
+                      <ItemRank>#{index + 1}</ItemRank>
+                      <ItemName>{item._id}</ItemName>
+                    </ItemContent>
+                    <ItemStats>
+                      <ItemBadge>
+                        <ItemCount>{item.count}</ItemCount>
+                        <ItemLabel>songs</ItemLabel>
+                      </ItemBadge>
+                    </ItemStats>
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <EmptyState>
+                <span className="material-symbols-outlined">album</span>
+                <p>No album data available</p>
+              </EmptyState>
+            )}
+          </Section>
+        </SectionsGrid>
+      </Content>
     </Container>
   );
 };

@@ -1,64 +1,100 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "@emotion/styled";
+import { ThemeProvider } from "@emotion/react";
+import { theme } from "./theme";
+import Layout from "./components/Layout";
 import SongList from "./components/SongList";
-import SongForm from "./components/SongForm";
 import Statistics from "./components/Statistics";
+import Modal from "./components/Modal";
+import SongForm from "./components/SongForm";
 
-const AppContainer = styled.div`
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
+const FABContainer = styled.div`
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 100;
 `;
 
-const Header = styled.header`
-  text-align: center;
-  margin-bottom: 3rem;
-
-  h1 {
-    color: white;
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  p {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 1.2rem;
-  }
-`;
-
-const MainContent = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 2rem;
-
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const Sidebar = styled.aside`
+const FAB = styled.button`
   display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  height: 56px;
+  width: 56px;
+  background: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.background.dark};
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(56, 224, 123, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: ${({ theme }) => theme.fonts.primary};
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0;
+
+  &:hover {
+    width: auto;
+    padding: 0 1.5rem;
+    box-shadow: 0 15px 35px rgba(56, 224, 123, 0.4);
+
+    .fab-text {
+      max-width: 200px;
+      margin-left: 0.5rem;
+      opacity: 1;
+    }
+  }
+
+  .material-symbols-outlined {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+`;
+
+const FABText = styled.span`
+  max-width: 0;
+  opacity: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 function App() {
-  return (
-    <AppContainer>
-      <Header>
-        <h1>🎵 Song Manager</h1>
-        <p>Manage your music collection with style</p>
-      </Header>
+  const [currentView, setCurrentView] = useState<"songs" | "statistics">(
+    "songs"
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-      <MainContent>
-        <SongList />
-        <Sidebar>
-          <SongForm />
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <Layout currentView={currentView} onNavigate={setCurrentView}>
+        {currentView === "songs" ? (
+          <SongList onAddClick={handleOpenModal} />
+        ) : (
           <Statistics />
-        </Sidebar>
-      </MainContent>
-    </AppContainer>
+        )}
+
+        <FABContainer>
+          <FAB onClick={handleOpenModal}>
+            <span className="material-symbols-outlined">add</span>
+            <FABText className="fab-text">Add Song</FABText>
+          </FAB>
+        </FABContainer>
+
+        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+          <SongForm onClose={handleCloseModal} />
+        </Modal>
+      </Layout>
+    </ThemeProvider>
   );
 }
 

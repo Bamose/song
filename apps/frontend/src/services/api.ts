@@ -1,5 +1,11 @@
 import axios from "axios";
-import { Song, Statistics, SongFormData, SongFilters } from "@song-app/types";
+import type {
+  Song,
+  Statistics,
+  SongFormData,
+  SongFilters,
+  PaginatedSongs,
+} from "@song-app/types";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -10,7 +16,9 @@ const api = axios.create({
   },
 });
 
-export const fetchSongs = async (filters?: SongFilters): Promise<Song[]> => {
+export const fetchSongs = async (
+  filters?: SongFilters
+): Promise<PaginatedSongs> => {
   const { data } = await api.get("/songs", { params: filters });
   return data;
 };

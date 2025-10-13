@@ -1,6 +1,13 @@
-import { call, put, takeLatest, all } from "redux-saga/effects";
+import { call, put, takeLatest, all, select } from "redux-saga/effects";
 import { PayloadAction } from "@reduxjs/toolkit";
-import { Song, Statistics, SongFormData, SongFilters } from "@song-app/types";
+import type {
+  Song,
+  Statistics,
+  SongFormData,
+  SongFilters,
+  PaginatedSongs,
+  PaginationMeta,
+} from "@song-app/types";
 import * as api from "../../services/api";
 import {
   fetchSongsRequest,
@@ -18,12 +25,35 @@ import {
   fetchStatisticsRequest,
   fetchStatisticsSuccess,
   fetchStatisticsFailure,
+  type FetchSongsPayload,
 } from "../slices/songSlice";
+import type { RootState } from "..";
 
-function* fetchSongsSaga(action: PayloadAction<SongFilters | undefined>) {
+function* fetchSongsSaga(action: PayloadAction<FetchSongsPayload | undefined>) {
   try {
-    const songs: Song[] = yield call(api.fetchSongs, action.payload);
-    yield put(fetchSongsSuccess(songs));
+    const currentFilters: SongFilters = yield select(
+      (state: RootState) => state.songs.filters
+    );
+    const payload = action.payload ?? {};
+    const { silent: _silent, ...incomingFilters } = payload;
+    const requestFilters =
+      Object.keys(incomingFilters).length > 0
+        ? { ...currentFilters, ...incomingFilters }
+        : currentFilters;
+    const sanitizedFilters = Object.entries(requestFilters).reduce(
+      (acc, [key, value]) => {
+        if (value !== undefined && value !== null) {
+          acc[key as keyof SongFilters] = value as never;
+        }
+        return acc;
+      },
+      {} as SongFilters
+    );
+    const response: PaginatedSongs = yield call(
+      api.fetchSongs,
+      sanitizedFilters
+    );
+    yield put(fetchSongsSuccess(response));
     yield put(fetchStatisticsRequest());
   } catch (error: any) {
     yield put(fetchSongsFailure(error.message || "Failed to fetch songs"));
@@ -50,7 +80,7 @@ function* updateSongSaga(
       action.payload.data
     );
     yield put(updateSongSuccess(song));
-    yield put(fetchStatisticsRequest());
+    yield put(fetchSongsRequest({ silent: true }));
   } catch (error: any) {
     yield put(updateSongFailure(error.message || "Failed to update song"));
   }
@@ -60,7 +90,24 @@ function* deleteSongSaga(action: PayloadAction<string>) {
   try {
     yield call(api.deleteSong, action.payload);
     yield put(deleteSongSuccess(action.payload));
-    yield put(fetchStatisticsRequest());
+    const { songs, pagination }: {
+      songs: Song[];
+      pagination: PaginationMeta | null;
+    } = yield select((state: RootState) => ({
+      songs: state.songs.songs,
+      pagination: state.songs.pagination,
+    }));
+
+    if (pagination && songs.length === 0 && pagination.page > 1) {
+      yield put(
+        fetchSongsRequest({
+          page: pagination.page,
+          silent: true,
+        })
+      );
+    } else {
+      yield put(fetchSongsRequest({ silent: true }));
+    }
   } catch (error: any) {
     yield put(deleteSongFailure(error.message || "Failed to delete song"));
   }
