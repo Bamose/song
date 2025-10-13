@@ -108,6 +108,8 @@ export const SectionsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
+  align-items: start;
+  grid-auto-rows: min-content;
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
@@ -116,13 +118,14 @@ export const SectionsGrid = styled.div`
 
 export const Section = styled.div`
   margin-bottom: 0;
+  height: fit-content;
 `;
 
 export const SectionHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 `;
 
 export const SectionTitleGroup = styled.div`
@@ -165,14 +168,14 @@ export const SectionCount = styled.span`
 
 export const List = styled.div`
   display: grid;
-  gap: 0.75rem;
+  gap: 0.5rem;
 `;
 
 export const ListItem = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem;
+  padding: 0.75rem 1rem;
   background: ${({ theme }) => theme.colors.background.card};
   border: 1px solid ${({ theme }) => theme.colors.border.primary};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
@@ -205,7 +208,7 @@ export const ListItem = styled.div`
 export const ItemContent = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   flex: 1;
 `;
 
@@ -213,26 +216,26 @@ export const ItemRank = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: ${({ theme }) => theme.borderRadius.md};
   background: ${({ theme }) => theme.colors.background.input};
   color: ${({ theme }) => theme.colors.text.secondary};
   font-weight: 700;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
 `;
 
 export const ItemName = styled.span`
   color: ${({ theme }) => theme.colors.text.primary};
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
   flex: 1;
 `;
 
 export const ItemStats = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 `;
 
 export const ItemBadge = styled.div`
@@ -246,9 +249,9 @@ export const ItemCount = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 48px;
-  height: 32px;
-  padding: 0 1rem;
+  min-width: 40px;
+  height: 28px;
+  padding: 0 0.75rem;
   background: linear-gradient(
     135deg,
     ${({ theme }) => theme.colors.primary}30,
@@ -256,7 +259,7 @@ export const ItemCount = styled.span`
   );
   color: ${({ theme }) => theme.colors.primary};
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 0.9rem;
   border-radius: ${({ theme }) => theme.borderRadius.full};
 `;
 
