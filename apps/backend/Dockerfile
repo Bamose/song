@@ -10,7 +10,7 @@ FROM base AS builder
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY apps/backend ./apps/backend
 COPY packages ./packages
-RUN pnpm install --frozen-lockfile --filter backend...
+RUN pnpm install --frozen-lockfile
 RUN pnpm --filter backend... build
 
 FROM node:18-alpine AS runner
@@ -20,6 +20,7 @@ ENV NODE_ENV=production \
     PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 COPY apps/backend/package.json apps/backend/package.json
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY --from=builder /srv/app/node_modules ./node_modules
 COPY --from=builder /srv/app/packages ./packages
 COPY --from=builder /srv/app/apps/backend/dist ./apps/backend/dist
