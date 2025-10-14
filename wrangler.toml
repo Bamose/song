@@ -1,0 +1,10 @@
+name = "song-frontend"
+main = "apps/frontend/worker.js"
+compatibility_date = "2025-10-14"
+
+[assets]
+directory = "apps/frontend/build"
+binding = "ASSETS"
+
+[build]
+command = "pnpm --dir apps/frontend build"
