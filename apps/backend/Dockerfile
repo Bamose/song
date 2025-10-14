@@ -19,11 +19,20 @@ ENV NODE_ENV=production \
     PNPM_HOME="/usr/local/share/pnpm" \
     PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
-COPY apps/backend/package.json apps/backend/package.json
+
+# Copy workspace configuration
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-COPY --from=builder /srv/app/node_modules ./node_modules
+
+# Copy packages (workspace dependencies)
 COPY --from=builder /srv/app/packages ./packages
+
+# Copy backend package.json and built files
+COPY apps/backend/package.json ./apps/backend/package.json
 COPY --from=builder /srv/app/apps/backend/dist ./apps/backend/dist
+
+# Install production dependencies only
+RUN pnpm install --prod --frozen-lockfile
+
 WORKDIR /srv/app/apps/backend
 EXPOSE 5000
 CMD ["node", "dist/index.js"]
