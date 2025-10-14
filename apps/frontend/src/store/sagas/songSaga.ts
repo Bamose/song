@@ -81,8 +81,8 @@ function* updateSongSaga(
     );
     yield put(updateSongSuccess(song));
     yield put(fetchSongsRequest({ silent: true }));
-  } catch (error: any) {
-    yield put(updateSongFailure(error.message || "Failed to update song"));
+  } catch (error) {
+    yield put(updateSongFailure("Failed to update song"));
   }
 }
 
@@ -90,7 +90,10 @@ function* deleteSongSaga(action: PayloadAction<string>) {
   try {
     yield call(api.deleteSong, action.payload);
     yield put(deleteSongSuccess(action.payload));
-    const { songs, pagination }: {
+    const {
+      songs,
+      pagination,
+    }: {
       songs: Song[];
       pagination: PaginationMeta | null;
     } = yield select((state: RootState) => ({
@@ -108,8 +111,8 @@ function* deleteSongSaga(action: PayloadAction<string>) {
     } else {
       yield put(fetchSongsRequest({ silent: true }));
     }
-  } catch (error: any) {
-    yield put(deleteSongFailure(error.message || "Failed to delete song"));
+  } catch (error) {
+    yield put(deleteSongFailure("Failed to delete song"));
   }
 }
 
@@ -117,10 +120,8 @@ function* fetchStatisticsSaga() {
   try {
     const statistics: Statistics = yield call(api.fetchStatistics);
     yield put(fetchStatisticsSuccess(statistics));
-  } catch (error: any) {
-    yield put(
-      fetchStatisticsFailure(error.message || "Failed to fetch statistics")
-    );
+  } catch (error) {
+    yield put(fetchStatisticsFailure("Failed to fetch statistics"));
   }
 }
 

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import logger from "@song-app/utils/logger";
 
 export const connectDB = async (): Promise<void> => {
   try {
@@ -7,18 +8,18 @@ export const connectDB = async (): Promise<void> => {
 
     await mongoose.connect(mongoURI);
 
-    console.log("✅ MongoDB connected successfully");
+    logger.log("✅ MongoDB connected successfully");
   } catch (error) {
-    console.error("❌ MongoDB connection error:", error);
+    logger.error("❌ MongoDB connection error:", error);
     throw error;
   }
 };
 
 // Handle connection events
 mongoose.connection.on("disconnected", () => {
-  console.log("⚠️  MongoDB disconnected");
+  logger.log("⚠️  MongoDB disconnected");
 });
 
 mongoose.connection.on("error", (error) => {
-  console.error("❌ MongoDB error:", error);
+  logger.error("❌ MongoDB error:", error);
 });

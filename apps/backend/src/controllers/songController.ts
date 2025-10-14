@@ -16,8 +16,8 @@ export class SongController {
 
       const savedSong = await song.save();
       res.status(201).json(savedSong);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create song" });
     }
   }
 
@@ -34,18 +34,27 @@ export class SongController {
         limit = "10",
       } = req.query;
 
+      const escapeRegExp = (value: string) =>
+        value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const buildCaseInsensitiveRegex = (value: string) =>
+        new RegExp(escapeRegExp(value.trim()), "i");
+
       const filter: Record<string, unknown> = {};
 
-      if (artist) filter.artist = artist;
-      if (genre) filter.genre = genre;
-      if (album) filter.album = album;
+      if (typeof artist === "string" && artist.trim()) {
+        filter.artist = { $regex: buildCaseInsensitiveRegex(artist) };
+      }
+      if (typeof genre === "string" && genre.trim()) {
+        filter.genre = { $regex: buildCaseInsensitiveRegex(genre) };
+      }
+      if (typeof album === "string" && album.trim()) {
+        filter.album = { $regex: buildCaseInsensitiveRegex(album) };
+      }
 
       if (search && typeof search === "string") {
         const searchTerm = search.trim();
         if (searchTerm.length > 0) {
-          const escapeRegExp = (value: string) =>
-            value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          const regex = new RegExp(escapeRegExp(searchTerm), "i");
+          const regex = buildCaseInsensitiveRegex(searchTerm);
           filter.$or = [
             { title: regex },
             { artist: regex },
@@ -106,8 +115,8 @@ export class SongController {
           sortOrder: sortDirection === 1 ? "asc" : "desc",
         },
       });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch songs" });
     }
   }
 
@@ -121,8 +130,8 @@ export class SongController {
       }
 
       res.json(song);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch song" });
     }
   }
 
@@ -142,8 +151,8 @@ export class SongController {
       }
 
       res.json(song);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update song" });
     }
   }
 
@@ -157,8 +166,8 @@ export class SongController {
       }
 
       res.json({ message: "Song deleted successfully", song });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete song" });
     }
   }
 
@@ -166,8 +175,8 @@ export class SongController {
     try {
       const stats = await SongService.getStatistics();
       res.json(stats);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve statistics" });
     }
   }
 }

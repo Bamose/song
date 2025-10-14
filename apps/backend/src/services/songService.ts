@@ -55,7 +55,7 @@ export class SongService {
         songsByAlbum,
       };
     } catch (error) {
-      throw new Error(`Failed to get statistics: ${error}`);
+      throw new Error("Failed to get statistics");
     }
   }
 }
