@@ -12,7 +12,6 @@ COPY apps/backend ./apps/backend
 COPY packages ./packages
 RUN pnpm install --frozen-lockfile --filter backend...
 RUN pnpm --filter backend... build
-RUN pnpm prune --prod --filter backend...
 
 FROM node:18-alpine AS runner
 WORKDIR /srv/app
