@@ -14,8 +14,8 @@ const PORT = Number(process.env.PORT) || 5000;
 app.use(
   cors({
     origin: [
-      "https://songaddis.bekenaanella.workers.dev/",
-      "http://localhost:3000",
+      "https://songaddis.bekenaanella.workers.dev/*",
+      "http://localhost:3000/*",
     ],
     credentials: true,
   })
