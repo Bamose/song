@@ -11,12 +11,24 @@ export const openApiSpec = {
       url: "http://localhost:5000",
       description: "Local development server",
     },
+    {
+      url: "https://song-api-sk0f.onrender.com",
+      description: "Production server (Render)",
+    },
   ],
   components: {
     schemas: {
       Song: {
         type: "object",
-        required: ["_id", "title", "artist", "album", "genre", "createdAt", "updatedAt"],
+        required: [
+          "_id",
+          "title",
+          "artist",
+          "album",
+          "genre",
+          "createdAt",
+          "updatedAt",
+        ],
         properties: {
           _id: {
             type: "string",
@@ -131,7 +143,14 @@ export const openApiSpec = {
           },
           sortBy: {
             type: "string",
-            enum: ["title", "artist", "album", "genre", "createdAt", "updatedAt"],
+            enum: [
+              "title",
+              "artist",
+              "album",
+              "genre",
+              "createdAt",
+              "updatedAt",
+            ],
             example: "createdAt",
           },
           sortOrder: {
