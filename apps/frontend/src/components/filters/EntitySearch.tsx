@@ -2,9 +2,9 @@ import React from "react";
 import { useDebounce } from "use-debounce";
 import {
   SearchContainer,
-  SearchWrapper,
   SearchIconWrapper,
   SearchInput,
+  SearchWrapper,
 } from "../../styles/SongList.styles";
 
 interface EntitySearchProps {

@@ -1,12 +1,11 @@
 import React from "react";
 import {
-  PaginationBar,
-  PaginationControls,
-  PaginationButton,
+  FilterControl,
   PageInfo,
   PageSizeSelect,
-  FilterControl,
-  FilterLabel,
+  PaginationBar,
+  PaginationButton,
+  PaginationControls,
 } from "../../styles/SongList.styles";
 import { calculatePaginationInfo } from "../../utils";
 

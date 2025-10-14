@@ -1,11 +1,11 @@
-import React from "react";
 import styled from "@emotion/styled";
+import type { SongSortField, SortOrder } from "@song-app/types";
+import React from "react";
 import {
   FilterControl,
   FilterLabel,
   FilterSelect,
 } from "../../styles/SongList.styles";
-import type { SongSortField, SortOrder } from "@song-app/types";
 
 const SortControlsContainer = styled.div`
   display: flex;

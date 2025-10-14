@@ -1,11 +1,11 @@
 import React from "react";
 import {
-  FiltersContainer,
-  FilterGroup,
-  FilterControl,
-  FilterLabel,
-  FilterInput,
   ControlsRow,
+  FilterControl,
+  FilterGroup,
+  FilterInput,
+  FilterLabel,
+  FiltersContainer,
   ResetButton,
 } from "../../styles/SongList.styles";
 
