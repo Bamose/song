@@ -27,10 +27,10 @@ const Layout: React.FC<LayoutProps> = ({
     <LayoutContainer>
       <Sidebar>
         <UserInfo>
-          <UserAvatar>JD</UserAvatar>
+          <UserAvatar>AB</UserAvatar>
           <UserDetails>
-            <UserName>John Doe</UserName>
-            <UserEmail>john.doe@example.com</UserEmail>
+            <UserName>Anella N. Bekena</UserName>
+            <UserEmail>bekenaanella@gmail.com</UserEmail>
           </UserDetails>
         </UserInfo>
 

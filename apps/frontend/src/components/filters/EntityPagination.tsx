@@ -86,8 +86,14 @@ const EntityPagination: React.FC<EntityPaginationProps> = ({
           Next
         </PaginationButton>
 
-        <FilterControl>
-          <FilterLabel htmlFor="page-size">Page Size</FilterLabel>
+        <FilterControl
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: "0.5rem",
+            marginLeft: "0.25rem",
+          }}
+        >
           <PageSizeSelect
             id="page-size"
             value={String(pageSize)}
