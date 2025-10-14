@@ -66,6 +66,7 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
     }
     dispatch(fetchSongsRequest(filters));
   }, [
+    filters.search,
     filters.artist,
     filters.album,
     filters.genre,
@@ -86,9 +87,8 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
   };
 
   const handleDebouncedSearch = (value: string) => {
-    dispatch(fetchSongsRequest({ ...filters, search: value }));
     if (value !== rawFilters.search) {
-      updatePage(1);
+      updateFilters({ search: value || null, page: 1 });
     }
   };
 

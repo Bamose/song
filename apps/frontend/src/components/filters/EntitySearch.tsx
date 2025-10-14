@@ -25,10 +25,8 @@ const EntitySearch: React.FC<EntitySearchProps> = ({
   const [debouncedValue] = useDebounce(value, debounceMs);
 
   React.useEffect(() => {
-    if (debouncedValue !== value) {
-      onDebouncedSearch(debouncedValue);
-    }
-  }, [debouncedValue, value, onDebouncedSearch]);
+    onDebouncedSearch(debouncedValue);
+  }, [debouncedValue, onDebouncedSearch]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
