@@ -2,16 +2,17 @@
   "name": "@song-app/types",
   "version": "1.0.0",
   "description": "Shared TypeScript types for song app",
-  "main": "index.ts",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "default": "./index.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
-    "build": "echo 'No build needed for types package'"
+    "build": "tsc",
+    "clean": "rm -rf dist"
   },
   "devDependencies": {
     "typescript": "^5.2.2"

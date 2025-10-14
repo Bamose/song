@@ -11,7 +11,11 @@ COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY apps/backend ./apps/backend
 COPY packages ./packages
 RUN pnpm install --frozen-lockfile
-RUN pnpm --filter backend... build
+# Build workspace packages first
+RUN pnpm --filter "@song-app/types" build
+RUN pnpm --filter "@song-app/utils" build
+# Then build backend
+RUN pnpm --filter backend build
 
 FROM node:18-alpine AS runner
 WORKDIR /srv/app
@@ -23,8 +27,11 @@ RUN corepack enable
 # Copy workspace configuration
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 
-# Copy packages (workspace dependencies)
-COPY --from=builder /srv/app/packages ./packages
+# Copy packages (workspace dependencies) - both package.json and built dist
+COPY packages/types/package.json ./packages/types/package.json
+COPY packages/utils/package.json ./packages/utils/package.json
+COPY --from=builder /srv/app/packages/types/dist ./packages/types/dist
+COPY --from=builder /srv/app/packages/utils/dist ./packages/utils/dist
 
 # Copy backend package.json and built files
 COPY apps/backend/package.json ./apps/backend/package.json
