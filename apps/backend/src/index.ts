@@ -13,7 +13,7 @@ const PORT = Number(process.env.PORT) || 5000;
 
 app.use(
   cors({
-    origin: "https://song-api-sk0f.onrender.com",
+    origin: "*",
     credentials: true,
   })
 );
