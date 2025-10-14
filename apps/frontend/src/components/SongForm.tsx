@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import { useAppSelector } from "../hooks/useAppSelector";
@@ -8,6 +8,7 @@ import {
   createSongRequest,
   selectSong,
   updateSongRequest,
+  deleteSongRequest,
 } from "../store/slices/songSlice";
 import {
   Button,
@@ -20,9 +21,11 @@ import {
   Label,
   Title,
 } from "../styles/SongForm.styles";
+import Modal from "./Modal";
 
 interface SongFormProps {
   onClose: () => void;
+  mode?: "new" | "edit";
 }
 
 const defaultValues: SongFormValues = {
@@ -32,12 +35,13 @@ const defaultValues: SongFormValues = {
   genre: "",
 };
 
-const SongForm: React.FC<SongFormProps> = ({ onClose }) => {
+const SongForm: React.FC<SongFormProps> = ({ onClose, mode = "new" }) => {
   const dispatch = useAppDispatch();
   const { selectedSong, isMutating } = useAppSelector((state) => state.songs);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const formValues = useMemo<SongFormValues>(() => {
-    if (selectedSong) {
+    if (mode === "edit" && selectedSong) {
       return {
         title: selectedSong.title,
         artist: selectedSong.artist,
@@ -47,7 +51,7 @@ const SongForm: React.FC<SongFormProps> = ({ onClose }) => {
     }
 
     return { ...defaultValues };
-  }, [selectedSong]);
+  }, [mode, selectedSong]);
 
   const {
     register,
@@ -58,6 +62,13 @@ const SongForm: React.FC<SongFormProps> = ({ onClose }) => {
     resolver: zodResolver(songFormSchema),
     values: formValues,
   });
+
+  // Reset form when mode is "new" or when no song is selected in edit mode
+  useEffect(() => {
+    if (mode === "new" || (mode === "edit" && !selectedSong)) {
+      reset(defaultValues);
+    }
+  }, [mode, selectedSong, reset]);
 
   const onSubmit = (values: SongFormValues) => {
     if (selectedSong?._id) {
@@ -75,9 +86,19 @@ const SongForm: React.FC<SongFormProps> = ({ onClose }) => {
     onClose();
   };
 
+  const handleConfirmClose = () => setConfirmOpen(false);
+
+  const handleConfirmDelete = () => {
+    if (selectedSong?._id) {
+      dispatch(deleteSongRequest(selectedSong._id));
+    }
+    setConfirmOpen(false);
+    handleCancel();
+  };
+
   return (
     <Container>
-      <Title>{selectedSong ? "Edit Song" : "Add New Song"}</Title>
+      <Title>{mode === "edit" ? "Edit Song" : "Add New Song"}</Title>
 
       <Form onSubmit={handleSubmit(onSubmit)}>
         <FormGroup>
@@ -129,10 +150,33 @@ const SongForm: React.FC<SongFormProps> = ({ onClose }) => {
             Cancel
           </Button>
           <Button type="submit" disabled={isMutating || isSubmitting}>
-            {selectedSong ? "Update Song" : "Add Song"}
+            {mode === "edit" ? "Update Song" : "Add Song"}
           </Button>
         </ButtonGroup>
       </Form>
+
+      <Modal isOpen={confirmOpen} onClose={handleConfirmClose}>
+        <Container>
+          <Title>Delete Song</Title>
+          <p style={{ color: "#96c5a9", marginBottom: "1rem" }}>
+            Are you sure you want to delete
+            {selectedSong?.title ? ` "${selectedSong.title}"` : " this song"}?
+            This action cannot be undone.
+          </p>
+          <ButtonGroup>
+            <Button type="button" variant="cancel" onClick={handleConfirmClose}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={handleConfirmDelete}
+            >
+              Delete
+            </Button>
+          </ButtonGroup>
+        </Container>
+      </Modal>
     </Container>
   );
 };

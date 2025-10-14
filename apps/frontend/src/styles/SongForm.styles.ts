@@ -55,7 +55,7 @@ export const ButtonGroup = styled.div`
   margin-top: 0.5rem;
 `;
 
-export const Button = styled.button<{ variant?: "cancel" }>`
+export const Button = styled.button<{ variant?: "cancel" | "danger" }>`
   flex: 1;
   padding: 0.75rem 1rem;
   border: none;
@@ -68,9 +68,11 @@ export const Button = styled.button<{ variant?: "cancel" }>`
   background: ${({ theme, variant }) =>
     variant === "cancel"
       ? theme.colors.background.input
+      : variant === "danger"
+      ? "#e04838"
       : theme.colors.primary};
   color: ${({ theme, variant }) =>
-    variant === "cancel"
+    variant === "cancel" || variant === "danger"
       ? theme.colors.text.primary
       : theme.colors.background.dark};
 

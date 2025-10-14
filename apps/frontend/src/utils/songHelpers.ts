@@ -105,12 +105,11 @@ export const createPaginationHandlers = (
 
 export const createActionHandlers = (
   dispatch: any,
-  onAddClick: () => void
+  onAddClick: () => void,
+  onConfirmDelete: (id: string) => void
 ) => ({
   handleDelete: (id: string) => {
-    if (window.confirm("Are you sure you want to delete this song?")) {
-      dispatch({ type: "songs/deleteSongRequest", payload: id });
-    }
+    onConfirmDelete(id);
   },
   handleEdit: (song: Song) => {
     dispatch({ type: "songs/selectSong", payload: song });

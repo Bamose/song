@@ -9,6 +9,7 @@ import type {
   PaginationMeta,
 } from "@song-app/types";
 import * as api from "../../services/api";
+import { toast } from "../../components/Toast";
 import {
   fetchSongsRequest,
   fetchSongsSuccess,
@@ -65,8 +66,11 @@ function* createSongSaga(action: PayloadAction<SongFormData>) {
     const song: Song = yield call(api.createSong, action.payload);
     yield put(createSongSuccess(song));
     yield put(fetchStatisticsRequest());
+    toast("Song created successfully", "success");
   } catch (error: any) {
-    yield put(createSongFailure(error.message || "Failed to create song"));
+    const message = error?.message || "Failed to create song";
+    yield put(createSongFailure(message));
+    toast(message, "error");
   }
 }
 
@@ -81,8 +85,11 @@ function* updateSongSaga(
     );
     yield put(updateSongSuccess(song));
     yield put(fetchSongsRequest({ silent: true }));
+    toast("Song updated successfully", "success");
   } catch (error) {
-    yield put(updateSongFailure("Failed to update song"));
+    const message = "Failed to update song";
+    yield put(updateSongFailure(message));
+    toast(message, "error");
   }
 }
 
@@ -90,6 +97,7 @@ function* deleteSongSaga(action: PayloadAction<string>) {
   try {
     yield call(api.deleteSong, action.payload);
     yield put(deleteSongSuccess(action.payload));
+    toast("Song deleted successfully", "success");
     const {
       songs,
       pagination,
@@ -112,7 +120,9 @@ function* deleteSongSaga(action: PayloadAction<string>) {
       yield put(fetchSongsRequest({ silent: true }));
     }
   } catch (error) {
-    yield put(deleteSongFailure("Failed to delete song"));
+    const message = "Failed to delete song";
+    yield put(deleteSongFailure(message));
+    toast(message, "error");
   }
 }
 

@@ -1,10 +1,13 @@
 /* eslint-disable */
 import type { SongSortField, SortOrder } from "@song-app/types";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import { useAppSelector } from "../hooks/useAppSelector";
 import { useSongFilters } from "../hooks/useSongFilters";
-import { fetchSongsRequest } from "../store/slices/songSlice";
+import {
+  fetchSongsRequest,
+  deleteSongRequest,
+} from "../store/slices/songSlice";
 import {
   ActionsCell,
   AlbumCell,
@@ -33,12 +36,14 @@ import {
   EntitySearch,
   EntitySort,
 } from "./filters";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface SongListProps {
   onAddClick: () => void;
+  onEditClick: () => void;
 }
 
-const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
+const SongList: React.FC<SongListProps> = ({ onAddClick, onEditClick }) => {
   const dispatch = useAppDispatch();
   const { songs, isFetching, pagination } = useAppSelector(
     (state) => state.songs
@@ -77,9 +82,28 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
     dispatch,
   ]);
 
-  const { handleDelete, handleEdit } = createActionHandlers(
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    id?: string;
+    title?: string;
+  }>({ open: false });
+
+  const openDeleteConfirm = (id: string, title?: string) =>
+    setConfirmState({ open: true, id, title });
+
+  const closeDeleteConfirm = () => setConfirmState({ open: false });
+
+  const confirmDelete = () => {
+    if (confirmState.id) {
+      dispatch(deleteSongRequest(confirmState.id));
+    }
+    closeDeleteConfirm();
+  };
+
+  const { handleEdit } = createActionHandlers(
     dispatch,
-    onAddClick
+    onEditClick,
+    (id: string) => openDeleteConfirm(id)
   );
 
   const handleSearchChange = (value: string) => {
@@ -201,7 +225,11 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
                             edit
                           </span>
                         </IconButton>
-                        <IconButton onClick={() => handleDelete(song._id!)}>
+                        <IconButton
+                          onClick={() =>
+                            openDeleteConfirm(song._id!, song.title)
+                          }
+                        >
                           <span className="material-symbols-outlined">
                             delete
                           </span>
@@ -225,6 +253,18 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
         isDisabled={isFetching}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmState.open}
+        title="Delete Song"
+        description={`Are you sure you want to delete${
+          confirmState.title ? ` "${confirmState.title}"` : " this song"
+        }? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={closeDeleteConfirm}
       />
     </Container>
   );

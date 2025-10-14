@@ -36,33 +36,43 @@ export class SongController {
 
       const escapeRegExp = (value: string) =>
         value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const buildCaseInsensitiveRegex = (value: string) =>
-        new RegExp(escapeRegExp(value.trim()), "i");
+      const buildRegexPattern = (value: string) => escapeRegExp(value.trim());
 
-      const filter: Record<string, unknown> = {};
+      const conditions: Array<Record<string, unknown>> = [];
 
       if (typeof artist === "string" && artist.trim()) {
-        filter.artist = { $regex: buildCaseInsensitiveRegex(artist) };
+        conditions.push({
+          artist: { $regex: buildRegexPattern(artist), $options: "i" },
+        });
       }
       if (typeof genre === "string" && genre.trim()) {
-        filter.genre = { $regex: buildCaseInsensitiveRegex(genre) };
+        conditions.push({
+          genre: { $regex: buildRegexPattern(genre), $options: "i" },
+        });
       }
       if (typeof album === "string" && album.trim()) {
-        filter.album = { $regex: buildCaseInsensitiveRegex(album) };
+        conditions.push({
+          album: { $regex: buildRegexPattern(album), $options: "i" },
+        });
       }
 
       if (search && typeof search === "string") {
         const searchTerm = search.trim();
         if (searchTerm.length > 0) {
-          const regex = buildCaseInsensitiveRegex(searchTerm);
-          filter.$or = [
-            { title: regex },
-            { artist: regex },
-            { album: regex },
-            { genre: regex },
-          ];
+          const pattern = buildRegexPattern(searchTerm);
+          conditions.push({
+            $or: [
+              { title: { $regex: pattern, $options: "i" } },
+              { artist: { $regex: pattern, $options: "i" } },
+              { album: { $regex: pattern, $options: "i" } },
+              { genre: { $regex: pattern, $options: "i" } },
+            ],
+          });
         }
       }
+
+      const finalFilter: Record<string, unknown> =
+        conditions.length > 1 ? { $and: conditions } : conditions[0] || {};
 
       const parsePositiveInt = (value: unknown, fallback: number): number => {
         const parsed = parseInt(String(value), 10);
@@ -93,11 +103,11 @@ export class SongController {
       };
 
       const [songs, total] = await Promise.all([
-        Song.find(filter)
+        Song.find(finalFilter)
           .sort(sortOptions)
           .skip((parsedPage - 1) * parsedLimit)
           .limit(parsedLimit),
-        Song.countDocuments(filter),
+        Song.countDocuments(finalFilter),
       ]);
 
       const totalPages = Math.max(Math.ceil(total / parsedLimit), 1);
