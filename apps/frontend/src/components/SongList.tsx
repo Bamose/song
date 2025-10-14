@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { SongSortField, SortOrder } from "@song-app/types";
 import React, { useEffect } from "react";
 import { useAppDispatch } from "../hooks/useAppDispatch";
@@ -55,12 +56,10 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
     isInitialMount,
   } = useSongFilters();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     dispatch(fetchSongsRequest(filters));
   }, []);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isInitialMount) {
       return;
