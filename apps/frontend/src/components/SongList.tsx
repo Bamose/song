@@ -55,10 +55,12 @@ const SongList: React.FC<SongListProps> = ({ onAddClick }) => {
     isInitialMount,
   } = useSongFilters();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     dispatch(fetchSongsRequest(filters));
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isInitialMount) {
       return;
