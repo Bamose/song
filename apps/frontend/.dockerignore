@@ -1,0 +1,22 @@
+# Exclude dependencies and build outputs from Docker context
+node_modules
+*/node_modules
+**/node_modules
+
+# Common build outputs
+build
+dist
+
+# Vite/CRA caches
+.cache
+.eslintcache
+
+# VCS and editor files
+.git
+.gitignore
+.vscode
+.idea
+
+# Env files (inject via compose)
+.env
+.env.*
