@@ -6,9 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docker:build": "docker compose build",
-    "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down",
     "docker:up:announce": "docker compose --profile announce up -d && docker compose logs --no-color announce",
+    "docker:down": "docker compose down",
     "docker:urls": "docker compose logs --no-color announce"
   },
   "keywords": [],
