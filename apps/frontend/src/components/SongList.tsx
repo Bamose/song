@@ -1,6 +1,6 @@
 /* eslint-disable */
 import type { SongSortField, SortOrder } from "@song-app/types";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import { useAppSelector } from "../hooks/useAppSelector";
 import { useSongFilters } from "../hooks/useSongFilters";
@@ -118,10 +118,13 @@ const SongList: React.FC<SongListProps> = ({ onAddClick, onEditClick }) => {
     setSearchValue(value);
   };
 
-  const handleDebouncedSearch = (value: string) => {
-    // Update URL state with debounced value
-    updateFilters({ search: value || null, page: 1 });
-  };
+  const handleDebouncedSearch = useCallback(
+    (value: string) => {
+      // Update URL state with debounced value
+      updateFilters({ search: value || null, page: 1 });
+    },
+    [updateFilters]
+  );
 
   const handleFilterChange = (key: string, value: string) => {
     updateFilters({ [key]: value || null, page: 1 });
