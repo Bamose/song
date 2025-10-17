@@ -53,13 +53,20 @@ const SongList: React.FC<SongListProps> = ({ onAddClick, onEditClick }) => {
     filters,
     rawFilters,
     updateFilters,
-    updateSearchImmediate,
     updatePage,
     updatePageSize,
     updateSort,
     resetFilters,
     isInitialMount,
   } = useSongFilters();
+
+  // Local state for search input to prevent glitching
+  const [searchValue, setSearchValue] = useState(rawFilters.search || "");
+
+  // Sync local search state with URL state when it changes externally
+  useEffect(() => {
+    setSearchValue(rawFilters.search || "");
+  }, [rawFilters.search]);
 
   useEffect(() => {
     dispatch(fetchSongsRequest(filters));
@@ -107,13 +114,13 @@ const SongList: React.FC<SongListProps> = ({ onAddClick, onEditClick }) => {
   );
 
   const handleSearchChange = (value: string) => {
-    updateSearchImmediate(value);
+    // Update local state for immediate UI feedback
+    setSearchValue(value);
   };
 
   const handleDebouncedSearch = (value: string) => {
-    if (value !== rawFilters.search) {
-      updateFilters({ search: value || null, page: 1 });
-    }
+    // Update URL state with debounced value
+    updateFilters({ search: value || null, page: 1 });
   };
 
   const handleFilterChange = (key: string, value: string) => {
@@ -134,6 +141,7 @@ const SongList: React.FC<SongListProps> = ({ onAddClick, onEditClick }) => {
 
   const handleResetFilters = () => {
     resetFilters();
+    setSearchValue(""); // Reset local search state
   };
 
   const currentPage = pagination?.page ?? 1;
@@ -169,7 +177,7 @@ const SongList: React.FC<SongListProps> = ({ onAddClick, onEditClick }) => {
       </Header>
 
       <EntitySearch
-        value={rawFilters.search}
+        value={searchValue}
         onSearchChange={handleSearchChange}
         onDebouncedSearch={handleDebouncedSearch}
         placeholder="Search for a song"
