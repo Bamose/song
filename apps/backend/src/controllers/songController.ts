@@ -102,13 +102,78 @@ export class SongController {
         [sortField]: sortDirection,
       };
 
-      const [songs, total] = await Promise.all([
-        Song.find(finalFilter)
-          .sort(sortOptions)
-          .skip((parsedPage - 1) * parsedLimit)
-          .limit(parsedLimit),
-        Song.countDocuments(finalFilter),
-      ]);
+      let songs: unknown[] = [];
+      let total = 0;
+
+      // If searching, boost results where the title matches, giving it higher weight
+      const isSearching = typeof search === "string" && search.trim().length > 0;
+      if (isSearching) {
+        const searchTerm = (search as string).trim();
+        const pattern = buildRegexPattern(searchTerm);
+
+        const titleExact = `^${pattern}$`;
+        const titleStarts = `^${pattern}`;
+
+        const sortStage: Record<string, 1 | -1> = { score: -1, ...sortOptions };
+
+        const pipeline: object[] = [
+          { $match: finalFilter },
+          {
+            $addFields: {
+              score: {
+                $add: [
+                  // Title has the highest weight (exact > startsWith > contains)
+                  {
+                    $cond: [
+                      { $regexMatch: { input: "$title", regex: titleExact, options: "i" } },
+                      100,
+                      {
+                        $cond: [
+                          { $regexMatch: { input: "$title", regex: titleStarts, options: "i" } },
+                          60,
+                          {
+                            $cond: [
+                              { $regexMatch: { input: "$title", regex: pattern, options: "i" } },
+                              40,
+                              0,
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  // Other fields contribute smaller weights
+                  { $cond: [{ $regexMatch: { input: "$artist", regex: pattern, options: "i" } }, 10, 0] },
+                  { $cond: [{ $regexMatch: { input: "$album", regex: pattern, options: "i" } }, 8, 0] },
+                  { $cond: [{ $regexMatch: { input: "$genre", regex: pattern, options: "i" } }, 5, 0] },
+                ],
+              },
+            },
+          },
+          { $sort: sortStage },
+          { $project: { score: 0 } },
+          { $skip: (parsedPage - 1) * parsedLimit },
+          { $limit: parsedLimit },
+        ];
+
+        const [docs, count] = await Promise.all([
+          Song.aggregate(pipeline as any),
+          Song.countDocuments(finalFilter),
+        ]);
+
+        songs = docs;
+        total = count;
+      } else {
+        const [docs, count] = await Promise.all([
+          Song.find(finalFilter)
+            .sort(sortOptions)
+            .skip((parsedPage - 1) * parsedLimit)
+            .limit(parsedLimit),
+          Song.countDocuments(finalFilter),
+        ]);
+        songs = docs as unknown[];
+        total = count;
+      }
 
       const totalPages = Math.max(Math.ceil(total / parsedLimit), 1);
 
