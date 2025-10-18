@@ -15,7 +15,11 @@
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.18.2",
+  "engines": {
+    "node": ">=20.18.1"
+  },
   "devDependencies": {
-    "turbo": "^2.5.8"
+    "turbo": "^2.5.8",
+    "wrangler": "^4.43.0"
   }
 }
