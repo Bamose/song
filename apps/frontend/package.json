@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "18.x"
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -32,7 +32,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "clean": "rm -rf build"
+    "clean": "rm -rf build",
+    "deploy": "wrangler deploy"
   },
   "eslintConfig": {
     "extends": [
@@ -52,6 +53,7 @@
     ]
   },
   "devDependencies": {
-    "@types/redux-saga": "^0.10.5"
+    "@types/redux-saga": "^0.10.5",
+    "wrangler": "^4.43.0"
   }
 }
